@@ -191,6 +191,9 @@ export default function ContactPage() {
           </Link>
 
           <div className="flex flex-wrap gap-5">
+            <Link href="/contact" className="transition hover:text-violet-300">
+              Contact
+            </Link>
             <Link href="/login" className="transition hover:text-violet-300">
               Log in
             </Link>
@@ -202,7 +205,7 @@ export default function ContactPage() {
             </Link>
           </div>
 
-          <p>© 2026 ByteSentinels</p>
+          <p>Kushagra Bajpai · Founder & Lead Developer · © 2026 ByteSentinels</p>
         </footer>
       </div>
     </main>

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
 import { auth } from "@/app/lib/firebase";
@@ -72,7 +73,8 @@ export default function SignupPage() {
         displayName: name.trim(),
       });
 
-      router.replace("/verify");
+      try { await sendEmailVerification(credential.user); } catch { /* The verification page offers a safe resend action. */ }
+      router.replace("/verify-email");
     } catch (err: unknown) {
       const code =
         typeof err === "object" &&
