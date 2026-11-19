@@ -1,5 +1,5 @@
 import { getAnalysisReport } from "@/lib/db";
-import { reportEmailFailureMessage, sendReportEmail } from "@/lib/email-report";
+import { sendReportEmail } from "@/lib/email-report";
 import { authenticateFirebaseRequest } from "@/lib/firebase-server-auth";
 import { NextResponse } from "next/server";
 
@@ -20,7 +20,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ success: true, message: `PDF report sent to ${authentication.user.email}.` });
   } catch (error) {
     console.error("Report email delivery failed:", error);
-    const message = reportEmailFailureMessage(error);
-    return NextResponse.json({ success: false, code: error instanceof Error ? error.message.split(":")[0] : "EMAIL_DELIVERY_FAILED", message: `${message} PDF download is available now.` }, { status: 503 });
+    return NextResponse.json({ success: false, code: error instanceof Error ? error.message.split(":")[0] : "EMAIL_DELIVERY_FAILED", message: "Your report is ready to download from this page." }, { status: 503 });
   }
 }

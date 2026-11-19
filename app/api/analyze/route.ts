@@ -409,20 +409,14 @@ export async function POST(request: Request) {
         } catch (emailError) {
           emailStatus = "failed";
           emailFailureMessage = reportEmailFailureMessage(emailError);
-          console.error("Automatic report email failed:", emailError);
+          console.error("Automatic report email failed:", emailFailureMessage);
         }
       }
     }
 
     const message = persistenceStatus !== "saved"
-      ? "Analysis completed, but the report could not be saved. Email delivery was skipped."
-      : emailStatus === "sent"
-        ? "Analysis complete. Your report is saved and a PDF copy was sent to your account email."
-        : emailStatus === "not_configured"
-          ? `Analysis complete and saved. ${reportEmailFailureMessage(new Error("EMAIL_NOT_CONFIGURED"))} You can download this report now.`
-          : emailStatus === "failed"
-            ? `Analysis complete and saved. ${emailFailureMessage} You can download or resend the PDF from your report.`
-            : "Analysis completed and saved successfully.";
+      ? "Analysis completed, but the report could not be saved."
+      : "Analysis complete and saved. Your report is ready to download.";
 
     return NextResponse.json({
       success: true,

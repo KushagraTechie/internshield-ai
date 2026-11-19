@@ -36,8 +36,14 @@ export default function ReportActions({ reportId, downloadOnly = false }: { repo
     try {
       const token = await user.getIdToken();
       const response = await fetch(`/api/reports/${encodeURIComponent(reportId)}/email`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
-      const data = await response.json() as { success?: boolean; message?: string };
-      if (!response.ok || !data.success) throw new Error(data.message || "Couldn't email this report.");
+      const data = await response.json() as { success?: boolean; code?: string; message?: string };
+      if (!response.ok || !data.success) {
+        if (data.code === "EMAIL_DELIVERY_FAILED" || response.status === 503) {
+          setNotice("Your report is ready to download here.");
+          return;
+        }
+        throw new Error(data.message || "Couldn't email this report.");
+      }
       setNotice(data.message || "PDF sent to your account email.");
     } catch (err) { setError(err instanceof Error ? err.message : "Couldn't email the report."); }
     finally { setBusy(null); }

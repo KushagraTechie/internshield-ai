@@ -13,48 +13,29 @@ export default function VerifyEmailPage() {
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
   const [verifiedReady, setVerifiedReady] = useState(false);
-  const [welcomeFailed, setWelcomeFailed] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const processingUid = useRef<string | null>(null);
 
   const finishVerifiedAccount = useCallback(async (user: User) => {
     if (processingUid.current === user.uid) return;
     processingUid.current = user.uid;
-    setBusy(true); setError(""); setMessage("");
+    setBusy(true); setMessage("");
     try {
       await reload(user);
       const currentUser = auth.currentUser;
       if (!currentUser?.emailVerified) {
-        setError("We haven't received confirmation yet. Open the verification link in your inbox, then try again.");
+        setMessage("Open the latest verification link, then check again. If a previous link has expired or was already used, request a fresh one below.");
         return;
       }
 
-      const token = await currentUser.getIdToken(true);
-      const response = await fetch("/api/account/welcome-email", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      });
-      const result = await response.json() as { success?: boolean; sent?: boolean; message?: string };
       setVerifiedReady(true);
-      if (!response.ok || !result.success) {
-        setWelcomeFailed(true);
-        setError(`Your account is confirmed, but we couldn't send the welcome email. ${result.message || "Please try again later."}`);
-      } else if (result.sent) {
-        setWelcomeFailed(false);
-        setMessage("Your account is confirmed. A welcome email is on its way.");
-      } else {
-        setWelcomeFailed(false);
-        setMessage("Your account is confirmed and ready to use.");
-      }
+      setMessage("Your account is confirmed and ready to use.");
     } catch {
       if (auth.currentUser?.emailVerified) {
         setVerifiedReady(true);
-        setWelcomeFailed(true);
-        setError("Your account is confirmed, but the welcome email could not be sent right now. You can continue to the workspace.");
+        setMessage("Your account is confirmed and ready to use.");
       } else {
-        setError("We couldn't check your account right now. Please try again.");
+        setMessage("We couldn't refresh the account status just now. Open the latest link or request a fresh one below.");
       }
     } finally {
       processingUid.current = null;
@@ -81,12 +62,12 @@ export default function VerifyEmailPage() {
   async function resend() {
     const user = auth.currentUser;
     if (!user) return router.replace("/login");
-    setBusy(true); setError(""); setMessage("");
+    setBusy(true); setMessage("");
     try {
       await sendEmailVerification(user);
       setMessage("A fresh verification link is on its way. Check your inbox and spam folder.");
     } catch {
-      setError("Firebase couldn't send the email right now. Wait a moment and try again.");
+      setMessage("If you don't see a fresh link, check your spam folder and try again in a moment.");
     } finally { setBusy(false); }
   }
 
@@ -107,11 +88,9 @@ export default function VerifyEmailPage() {
         <div className="mt-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-2xl text-cyan-200">✉</div>
         <p className="mt-7 text-xs font-bold tracking-[0.22em] text-cyan-300">ONE QUICK ACCOUNT CHECK</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Confirm it’s really you.</h1>
-        <p className="mt-4 leading-7 text-slate-300">We sent a secure verification link to <strong className="break-all text-white">{email || "your email"}</strong>. Confirm your email to unlock private analysis reports and account history.</p>
-        {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-200">{error}</p>}
-        {message && <p role="status" className="mt-5 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</p>}
+        <p className="mt-4 leading-7 text-slate-300">Check <strong className="break-all text-white">{email || "your email"}</strong> for a verification link. If it hasn’t arrived or an earlier link has expired, request a fresh one below.</p>
+        {message && <p role="status" className="mt-5 rounded-xl border border-violet-400/20 bg-violet-400/10 p-3 text-sm text-violet-100">{message}</p>}
         <button type="button" onClick={() => verifiedReady ? router.replace("/verify") : void checkVerification()} disabled={checking || busy} className="mt-7 w-full rounded-xl bg-violet-500 px-5 py-3.5 font-semibold transition hover:bg-violet-400 disabled:opacity-50">{busy ? "Checking your account…" : verifiedReady ? "Continue to your workspace" : "I've verified my email"}</button>
-        {verifiedReady && welcomeFailed && <button type="button" onClick={() => { const user = auth.currentUser; if (user) void finishVerifiedAccount(user); }} disabled={busy} className="mt-3 w-full rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-violet-300/50 hover:bg-white/[0.04] disabled:opacity-50">{busy ? "Retrying…" : "Try the welcome email again"}</button>}
         {!verifiedReady && <button type="button" onClick={() => void resend()} disabled={checking || busy} className="mt-3 w-full rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-violet-300/50 hover:bg-white/[0.04] disabled:opacity-50">Resend verification link</button>}
         {!verifiedReady && <button type="button" onClick={() => void switchAccount()} className="mt-5 w-full text-sm text-slate-400 underline decoration-white/20 underline-offset-4 hover:text-white">Use a different account</button>}
         <p className="mt-8 border-t border-white/10 pt-5 text-xs leading-5 text-slate-500">Can’t find it? Check spam or promotions. The link is sent by Firebase Authentication.</p>

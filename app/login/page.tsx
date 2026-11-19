@@ -5,11 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import {
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-} from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 
 // Use the same Firebase file path as your working signup page.
 import { auth } from "@/app/lib/firebase";
@@ -60,7 +56,6 @@ export default function LoginPage() {
       const credential = await signInWithEmailAndPassword(auth, cleanEmail, password);
 
       if (!credential.user.emailVerified) {
-        try { await sendEmailVerification(credential.user); } catch { /* The verification page offers a safe resend action. */ }
         router.replace("/verify-email");
         return;
       }

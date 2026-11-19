@@ -73,7 +73,11 @@ export default function SignupPage() {
         displayName: name.trim(),
       });
 
-      try { await sendEmailVerification(credential.user); } catch { /* The verification page offers a safe resend action. */ }
+      try {
+        await sendEmailVerification(credential.user);
+      } catch {
+        // The verification page offers a resend action without blocking signup.
+      }
       router.replace("/verify-email");
     } catch (err: unknown) {
       const code =
