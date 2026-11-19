@@ -5,6 +5,8 @@
 
 **Built by ByteSentinels** | Developed by Kushagra Bajpai
 
+**Live website:** [https://internshield-ai-qkim.onrender.com/](https://internshield-ai-qkim.onrender.com/)
+
 InternShield AI is a web platform designed to help students assess internship opportunities, identify potential warning signs, and make more informed career decisions.
 
 Requires Node.js 24.12.0 or newer.
@@ -32,6 +34,7 @@ Our goal is to make internship research safer by encouraging students to review 
 | Tailwind CSS | Styling and responsive layouts |
 | Firebase Authentication | User account management |
 | Neon PostgreSQL | Persistent report and verification data |
+| Google Web Risk | Optional URL threat-list lookup (free monthly usage capped by the app) |
 | Git & GitHub | Version control and collaboration |
 
 ## 📂 Project Structure
@@ -95,6 +98,7 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 RESEND_API_KEY=re_your_resend_api_key
 RESEND_FROM_EMAIL="InternShield AI <reports@your-verified-domain.com>"
+WEB_RISK_API_KEY=your_google_cloud_web_risk_api_key
 ```
 
 Replace the example values with your own Firebase project configuration. Never upload `.env.local` or private service-account credentials.
@@ -114,6 +118,8 @@ DATABASE_URL=your_neon_pooled_connection_string
 
 From the project folder, run `npm run db:migrate` to create the users, companies, analysis reports, verification records, and audit logs tables in Neon. The migration uses `CREATE TABLE IF NOT EXISTS` and can be rerun safely.
 
+The optional website reputation check uses Google Web Risk Lookup. Create an API key in Google Cloud for the Web Risk API and set `WEB_RISK_API_KEY` in the server environment. Application URLs are sent to Google for this lookup when configured. The app reserves at most 75,000 lookups per calendar month in Neon to stay under Google's currently published 100,000 free monthly lookups; keep this key dedicated to this app, since Google's quota can also be consumed by other uses of the same project. Running `npm run db:migrate` adds the monthly usage counter. If no key is set, or the app's cap is reached, the rest of the website checks still run and the report says the reputation lookup was not completed. Do not enable billing or accept a paid plan to set this up without reviewing Google's current terms first.
+
 Run `npm run db:smoke` to verify report insertion, user-specific history, and individual report retrieval. It creates and removes a synthetic test record.
 
 ### 5. Profile photos and PDF email
@@ -132,7 +138,7 @@ The previous local SQLite file at `data/internshield.sqlite` is retained as a ba
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The live app is [https://internshield-ai-qkim.onrender.com/](https://internshield-ai-qkim.onrender.com/). For a local preview, open the address printed by `npm run dev`.
 
 ## 🔐 Security Notes
 

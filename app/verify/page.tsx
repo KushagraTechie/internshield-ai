@@ -411,8 +411,7 @@ export default function VerifyPage() {
                   className={inputClass}
                 />
                 <p className={`mt-2 text-xs ${theme.muted}`}>
-                  Optional. The current API checks URL formatting only; it does
-                  not visit or scan the website.
+                  Optional. We check public access, redirects, page text, and—when configured—Google Web Risk threat lists. This cannot prove an offer is genuine.
                 </p>
               </div>
 
@@ -513,8 +512,7 @@ export default function VerifyPage() {
               </button>
 
               <p className={`text-center text-xs leading-5 ${theme.muted}`}>
-                The backend uses rule-based checks. It does not independently
-                verify the company or scan external websites.
+                We combine rule-based checks with a limited public website scan. The report cannot confirm company registration or prove that a specific internship offer is real.
               </p>
             </form>
           </section>
@@ -665,6 +663,24 @@ export default function VerifyPage() {
                       </div>
                     )}
                   </div>
+
+                  {analysis.websiteCheck && (
+                    <div className={`mt-5 border-t pt-5 ${theme.divider}`}>
+                      <h3 className="font-bold">Website and reputation check</h3>
+                      <p className={`mt-2 break-all text-xs leading-5 ${theme.muted}`}>
+                        {analysis.websiteCheck.finalUrl ?? analysis.websiteCheck.requestedUrl}
+                        {analysis.websiteCheck.httpStatus ? ` · HTTP ${analysis.websiteCheck.httpStatus}` : ""}
+                      </p>
+                      <p className={`mt-2 text-xs leading-5 ${theme.muted}`}>
+                        Google Web Risk: {analysis.websiteCheck.webRisk.status === "clear" ? "No current threat-list match" : analysis.websiteCheck.webRisk.status === "threat" ? `Potential threat (${analysis.websiteCheck.webRisk.threatTypes.join(", ")})` : analysis.websiteCheck.webRisk.status === "quota_reached" ? "Monthly app allowance reached" : analysis.websiteCheck.webRisk.status === "not_configured" ? "Not configured" : "Unavailable"}
+                        {analysis.websiteCheck.webRisk.checkedAt ? ` · Checked ${new Date(analysis.websiteCheck.webRisk.checkedAt).toLocaleString()}` : ""}
+                      </p>
+                      <ul className={`mt-3 space-y-2 text-xs leading-5 ${theme.muted}`}>
+                        {analysis.websiteCheck.evidence.map((item, index) => <li key={`website-evidence-${index}`}>• {item}</li>)}
+                        {analysis.websiteCheck.limitations.map((item, index) => <li key={`website-limit-${index}`} className="text-amber-500">• {item}</li>)}
+                      </ul>
+                    </div>
+                  )}
 
                   <div className={`mt-6 border-t pt-5 ${theme.divider}`}>
                     <h3 className="font-bold">Checks performed</h3>

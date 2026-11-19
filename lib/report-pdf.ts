@@ -90,6 +90,14 @@ export async function createReportPdf(report: AnalysisReport) {
     page.drawText("WHAT WAS CHECKED", { x: margin, y, size: 10, font: bold, color: olive }); y -= 17;
     for (const check of report.checksPerformed) paragraph(`- ${check}`, 9, regular, muted, 6);
   }
+  if (report.websiteCheck) {
+    ensure(26);
+    page.drawText("WEBSITE AND THREAT REPUTATION", { x: margin, y, size: 10, font: bold, color: olive }); y -= 17;
+    const web = report.websiteCheck;
+    paragraph(`URL: ${web.finalUrl ?? web.requestedUrl}`, 9, regular, muted, 6);
+    paragraph(`Google Web Risk: ${web.webRisk.status}${web.webRisk.threatTypes.length ? ` (${web.webRisk.threatTypes.join(", ")})` : ""}${web.webRisk.checkedAt ? `; checked ${new Date(web.webRisk.checkedAt).toISOString()}` : ""}`, 9, regular, muted, 6);
+    for (const item of [...web.evidence, ...web.limitations]) paragraph(`- ${item}`, 9, regular, muted, 6);
+  }
   if (report.limitations.length) {
     ensure(26);
     page.drawText("LIMITATIONS", { x: margin, y, size: 10, font: bold, color: olive }); y -= 17;

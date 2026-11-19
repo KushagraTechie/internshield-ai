@@ -32,10 +32,10 @@ const result = await sql`
   SELECT table_name
   FROM information_schema.tables
   WHERE table_schema = 'public'
-    AND table_name IN ('users', 'companies', 'analysis_reports', 'verification_records', 'audit_logs')
+    AND table_name IN ('users', 'companies', 'analysis_reports', 'verification_records', 'audit_logs', 'web_risk_usage')
 `;
 const installedTables = new Set(result.map((row) => String(row.table_name)));
-const requiredTables = ["users", "companies", "analysis_reports", "verification_records", "audit_logs"];
+const requiredTables = ["users", "companies", "analysis_reports", "verification_records", "audit_logs", "web_risk_usage"];
 const missingTables = requiredTables.filter((table) => !installedTables.has(table));
 if (missingTables.length > 0) {
   throw new Error(`Schema setup finished, but these tables are missing: ${missingTables.join(", ")}.`);

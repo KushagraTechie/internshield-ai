@@ -58,5 +58,11 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS web_risk_usage (
+  usage_month date PRIMARY KEY,
+  request_count integer NOT NULL DEFAULT 0 CHECK (request_count BETWEEN 0 AND 75000),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE INDEX IF NOT EXISTS audit_logs_by_user
   ON audit_logs (user_id, created_at DESC);

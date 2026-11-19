@@ -31,6 +31,20 @@ export async function checkDatabase() {
   return rows[0] as { database_name: string; reports_table: string | null };
 }
 
+export async function reserveWebRiskLookup() {
+  const sql = getSql();
+  const rows = await sql`
+    INSERT INTO web_risk_usage (usage_month, request_count)
+    VALUES (date_trunc('month', now())::date, 1)
+    ON CONFLICT (usage_month) DO UPDATE SET
+      request_count = web_risk_usage.request_count + 1,
+      updated_at = now()
+    WHERE web_risk_usage.request_count < 75000
+    RETURNING request_count
+  `;
+  return rows.length > 0;
+}
+
 export async function claimWelcomeEmail(user: FirebaseIdentity) {
   const sql = getSql();
   const rows = await sql`
